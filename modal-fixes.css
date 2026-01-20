@@ -1,0 +1,64 @@
+/* Modal Fixes */
+.game-modal-content {
+    max-height: 85vh !important;
+    max-width: 500px !important;
+    width: 90% !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    padding: 1.5rem !important;
+    scrollbar-width: thin;
+    scrollbar-color: #22d3ee #0f172a;
+}
+
+/* Custom Scrollbar for Modal */
+.game-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.game-modal-content::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.game-modal-content::-webkit-scrollbar-thumb {
+    background-color: #22d3ee;
+    border-radius: 20px;
+}
+
+.modal-close {
+    position: sticky !important;
+    top: 0 !important;
+    float: right !important;
+    margin-top: -0.5rem !important;
+    margin-right: -0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    z-index: 100 !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    width: 36px !important;
+    height: 36px !important;
+    border: 1px solid #334155 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+    color: #cbd5e1 !important;
+    transition: all 0.2s ease !important;
+    backdrop-filter: blur(4px);
+}
+
+.modal-close:hover {
+    background: #ef4444 !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+    transform: rotate(90deg);
+}
+
+.modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Content spacing */
+.game-modal-header {
+    margin-top: 0.5rem;
+}
