@@ -12,39 +12,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     const response = await fetch('games_dump_complete.json');
     const data = await response.json();
 
-    regularGames = data.map(game => {
-      const primary = game.account_options?.find(opt => opt.type === 'primaria') || { price: 0 };
-      const secondary = game.account_options?.find(opt => opt.type === 'secundaria') || { price: 0 };
+    regularGames = data
+      .filter(game => game.in_stock === 'True')
+      .map(game => {
+        const primary = game.account_options?.find(opt => opt.type === 'primaria') || { price: 0 };
+        const secondary = game.account_options?.find(opt => opt.type === 'secundaria') || { price: 0 };
 
-      let category = 'outros';
-      const genres = game.genre || [];
-      const genreString = genres.join(' ').toLowerCase();
+        let category = 'outros';
+        const genres = game.genres || [];
+        const genreString = genres.join(' ').toLowerCase();
 
-      if (genreString.includes('terror')) category = 'terror';
-      else if (genreString.includes('luta')) category = 'luta';
-      else if (genreString.includes('esporte') || genreString.includes('corrida') || genreString.includes('futebol')) category = 'esporte';
-      else if (genreString.includes('infantil') || genreString.includes('lego') || genreString.includes('family')) category = 'infantil';
-      else if (genreString.includes('rpg')) category = 'rpg';
-      else if (genreString.includes('aventura')) category = 'aventura';
-      else if (genreString.includes('ação') || genreString.includes('acao') || genreString.includes('tiro')) category = 'acao';
+        if (genreString.includes('terror')) category = 'terror';
+        else if (genreString.includes('luta')) category = 'luta';
+        else if (genreString.includes('esporte') || genreString.includes('corrida') || genreString.includes('futebol')) category = 'esporte';
+        else if (genreString.includes('infantil') || genreString.includes('lego') || genreString.includes('family')) category = 'infantil';
+        else if (genreString.includes('rpg')) category = 'rpg';
+        else if (genreString.includes('aventura')) category = 'aventura';
+        else if (genreString.includes('ação') || genreString.includes('acao') || genreString.includes('tiro')) category = 'acao';
 
-      return {
-        id: game.id,
-        title: game.title,
-        platform: game.console,
-        image_url: game.image,
-        description: game.description,
-        category: category,
-        primaryAccount: {
-          pixPrice: Number(primary.price),
-          installmentPrice: Number(primary.price)
-        },
-        secondaryAccount: {
-          pixPrice: Number(secondary.price),
-          installmentPrice: Number(secondary.price)
-        }
-      };
-    });
+        return {
+          id: game.id,
+          title: game.title,
+          platform: game.console,
+          image_url: game.image,
+          description: game.description,
+          category: category,
+          primaryAccount: {
+            pixPrice: Number(primary.price),
+            installmentPrice: Number(primary.price)
+          },
+          secondaryAccount: {
+            pixPrice: Number(secondary.price),
+            installmentPrice: Number(secondary.price)
+          }
+        };
+      });
 
     initRegularGames();
   } catch (error) {
@@ -67,6 +69,8 @@ function initRegularGames() {
 
   let currentCategory = 'all';
   let filteredGames = [...regularGames];
+  let currentPage = 1;
+  const itemsPerPage = 32;
 
   function updateNoResultsMessage() {
     const searchTerm = searchInput.value.trim();
@@ -103,8 +107,110 @@ function initRegularGames() {
     window.open(`https://wa.me/5518997409779?text=${encodeURIComponent(message)}`, '_blank');
   };
 
+  function renderPagination() {
+    const paginationContainer = document.getElementById('paginationControls');
+    if (!paginationContainer) return;
+
+    paginationContainer.innerHTML = '';
+    const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
+
+    if (totalPages <= 1) return;
+
+    // Previous Button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'pagination-btn';
+    prevBtn.innerHTML = '<';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderGames();
+        window.scrollTo({ top: gamesGrid.offsetTop - 100, behavior: 'smooth' });
+      }
+    };
+    paginationContainer.appendChild(prevBtn);
+
+    // Page Buttons
+    // Logic to show a window of pages or all if few enough
+    // For simplicity, showing window of 5 pages or dots
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    if (endPage - startPage < 4) {
+      startPage = Math.max(1, endPage - 4);
+    }
+
+    if (startPage > 1) {
+      const firstBtn = document.createElement('button');
+      firstBtn.className = 'pagination-btn';
+      firstBtn.innerText = '1';
+      firstBtn.onclick = () => {
+        currentPage = 1;
+        renderGames();
+        window.scrollTo({ top: gamesGrid.offsetTop - 100, behavior: 'smooth' });
+      };
+      paginationContainer.appendChild(firstBtn);
+
+      if (startPage > 2) {
+        const dots = document.createElement('span');
+        dots.style.color = '#94a3b8';
+        dots.style.alignSelf = 'center';
+        dots.innerText = '...';
+        paginationContainer.appendChild(dots);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      btn.innerText = i;
+      btn.onclick = () => {
+        currentPage = i;
+        renderGames();
+        window.scrollTo({ top: gamesGrid.offsetTop - 100, behavior: 'smooth' });
+      };
+      paginationContainer.appendChild(btn);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        const dots = document.createElement('span');
+        dots.style.color = '#94a3b8';
+        dots.style.alignSelf = 'center';
+        dots.innerText = '...';
+        paginationContainer.appendChild(dots);
+      }
+
+      const lastBtn = document.createElement('button');
+      lastBtn.className = 'pagination-btn';
+      lastBtn.innerText = totalPages;
+      lastBtn.onclick = () => {
+        currentPage = totalPages;
+        renderGames();
+        window.scrollTo({ top: gamesGrid.offsetTop - 100, behavior: 'smooth' });
+      };
+      paginationContainer.appendChild(lastBtn);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'pagination-btn';
+    nextBtn.innerHTML = '>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderGames();
+        window.scrollTo({ top: gamesGrid.offsetTop - 100, behavior: 'smooth' });
+      }
+    };
+    paginationContainer.appendChild(nextBtn);
+  }
+
   function renderGames() {
     gamesGrid.innerHTML = '';
+    const paginationContainer = document.getElementById('paginationControls');
+    if (paginationContainer) paginationContainer.innerHTML = '';
 
     if (resultsCount) {
       resultsCount.textContent = `${filteredGames.length} jogos encontrados`;
@@ -120,7 +226,12 @@ function initRegularGames() {
     gamesGrid.style.display = 'grid';
     noResults.style.display = 'none';
 
-    filteredGames.forEach(game => {
+    // Pagination Slice
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const gamesToShow = filteredGames.slice(startIndex, endIndex);
+
+    gamesToShow.forEach(game => {
       const gameCard = document.createElement('div');
       gameCard.className = 'regular-game-card';
       gameCard.style.cursor = 'pointer';
@@ -148,6 +259,8 @@ function initRegularGames() {
 
       gamesGrid.appendChild(gameCard);
     });
+
+    renderPagination();
   }
 
   function filterGames() {
@@ -162,6 +275,7 @@ function initRegularGames() {
       return matchesSearch && matchesCategory && matchesPrice;
     });
 
+    currentPage = 1; // Reset to first page on filter change
     renderGames();
   }
 
