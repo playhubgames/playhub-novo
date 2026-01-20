@@ -249,12 +249,10 @@
 
     <div class="regular-games-section" id="catalogo">
       <div class="regular-games-hero">
-        <img src="public/catalago-principal.png" alt="Catálogo de Jogos" class="regular-games-hero-image">
-        <div class="regular-games-hero-overlay"></div>
         <h2 class="regular-games-hero-text">Catálogo PS4 e PS5</h2>
       </div>
 
-      <div class="container catalog-wrapper">
+      <div class="catalog-wrapper">
         <aside class="catalog-sidebar">
           <div class="sidebar-group">
             <h3 class="sidebar-title">
@@ -319,6 +317,28 @@
             </div>
           </div>
 
+
+          <div class="sidebar-group">
+            <h4 class="sidebar-subtitle">Console</h4>
+            <div class="sidebar-filters" id="consoleFilters">
+              <label class="sidebar-filter-item">
+                <input type="radio" name="console" value="all" checked>
+                <span class="checkmark"></span>
+                Todos os Consoles
+              </label>
+              <label class="sidebar-filter-item">
+                <input type="radio" name="console" value="ps4">
+                <span class="checkmark"></span>
+                Playstation 4
+              </label>
+              <label class="sidebar-filter-item">
+                <input type="radio" name="console" value="ps5">
+                <span class="checkmark"></span>
+                Playstation 5
+              </label>
+            </div>
+          </div>
+
           <div class="sidebar-group">
             <h4 class="sidebar-subtitle">Preço Máximo</h4>
             <div class="price-filter-container">
@@ -336,6 +356,7 @@
             <span id="resultsCount">Carregando jogos...</span>
           </div>
 
+          <div id="paginationControls" class="pagination-container" style="margin-top: 0; margin-bottom: 2rem;"></div>
           <div class="regular-games-grid" id="regularGamesGrid"></div>
 
           <div id="noResults" class="no-results" style="display: none;">
